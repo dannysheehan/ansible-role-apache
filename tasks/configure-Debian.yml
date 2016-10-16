@@ -28,23 +28,44 @@
   register: apache_ssl_certificates
   with_items: "{{ apache_vhosts_ssl }}"
 
-- name: Add apache vhosts configuration.
+- name: Add apache vhost configuration.
   template:
-    src: "vhosts.conf.j2"
-    dest: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
+    src: "vhost.conf.j2"
+    dest: "{{ apache_conf_path }}/sites-available/{{ item.servername }}.conf"
     owner: root
     group: root
     mode: 0644
+  with_items: "{{ apache_vhosts }}"
   notify: restart apache
   when: apache_create_vhosts
 
-- name: Add vhost symlink in sites-enabled.
-  file:
-    src: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
-    dest: "{{ apache_conf_path }}/sites-enabled/{{ apache_vhosts_filename }}"
-    state: link
+- name: Add apache vhost-ssl configuration.
+  template:
+    src: "vhost-ssl.conf.j2"
+    dest: "{{ apache_conf_path }}/sites-available/{{ item.servername }}-ssl.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_vhosts_ssl }}"
   notify: restart apache
   when: apache_create_vhosts
+
+
+
+- name: Enable Apache sites.
+  file:
+    src: "{{ apache_server_root }}/sites-available/{{ item }}"
+    dest: "{{ apache_server_root }}/sites-eenabled/{{ item }}"
+    state: link
+  with_items: "{{ apache_sites_enabled }}"
+  notify: restart apache
+
+- name: Disable Apache sites.
+  file:
+    path: "{{ apache_server_root }}/sites-enabled/{{ item }}"
+    state: absent
+  with_items: "{{ apache_sites_disabled }}"
+  notify: restart apache
 
 - name: Remove default vhost in sites-enabled.
   file:

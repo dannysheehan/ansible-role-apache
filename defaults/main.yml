@@ -16,16 +16,16 @@ apache_global_vhost_settings: |
   DirectoryIndex index.php index.html
 
 apache_vhosts:
-  # Additional properties: 'serveradmin, serveralias, extra_parameters'.
   - servername: "local.dev"
     documentroot: "/var/www/html"
+  # Additional properties: 'serveradmin, serveralias, extra_parameters'.
 
-apache_vhosts_ssl: []
+apache_vhosts_ssl:
+  - servername: "local.dev"
+    documentroot: "/var/www/html"
+    certificate_file: "/path/to/certificate.crt"
+    certificate_key_file: "/path/to/certificate.key"
   # Additional properties: 'serveradmin, extra_parameters'.
-  # - servername: "local.dev",
-  #   documentroot: "/var/www/html",
-  #   certificate_file: "/path/to/certificate.crt",
-  #   certificate_key_file: "/path/to/certificate.key",
   #   # Optional.
   #   certificate_chain_file: "/path/to/certificate_chain.crt"
 
@@ -39,6 +39,11 @@ apache_mods_enabled:
   - rewrite.load
   - ssl.load
 apache_mods_disabled: []
+
+apache_sites_enabled:
+  - local.dev-ssl.conf
+
+apache_sites_disabled: []
 
 # Set initial apache state. Recommended values: `started` or `stopped`
 apache_state: started
